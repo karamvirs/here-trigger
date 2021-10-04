@@ -8,7 +8,7 @@ return [
     'helper_class' => 'App\Helpers\HereTriggerHelper',
     'filters' => [
         'user' => [
-            'age_bet_30_and_40' => ['filter' => ['age', Operators::RANGE_INCLUSIVE, [30, 40]], 'value_function' => 'userAge'],
+            'age_bet_30_and_40' => ['filter' => ['age', Operators::RANGE_INCLUSIVE, [30, 40]]], // No valu function, age is a property on the user object
             'next_birthday_in_2_months' => ['filter' => ['next_birthday', Operators::LESS_THAN_EQUAL_TO, Carbon::now()->addMonths(2)], 'value_function' => 'userNextBirthday'],
             'prev_order_within_a_month' => ['filter' => ['prev_order_date', operators::DATE_GREATER_THAN_OR_EQUAL_TO, Carbon::now()->subMonth()], 'value_function' => 'userPrevOrderDate'],
             'prev_order_within_10_days' => ['filter' => ['prev_order_date', operators::DATE_GREATER_THAN_OR_EQUAL_TO, Carbon::now()->subDays(10)], 'value_function' => 'userPrevOrderDate'],
