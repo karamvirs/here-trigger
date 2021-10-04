@@ -16,9 +16,13 @@ class HereTrigger
 
     private $config;
 
+    private $helper;
+
     public function __construct()
     {
         $this->config = config('here-trigger');
+
+        $this->helper = $this->config['helper_class'];
     }
 
     public function process($triggerName, $payload)
@@ -118,7 +122,7 @@ class HereTrigger
         $filterInfo = $this->config['filters'][$splits[0]][$splits[1]];
 
         $filter = $filterInfo['filter'];
-        $valueFunction = $filterInfo['value_function'] ?? null;
+        $valueFunction = isset($filterInfo['value_function']) && !empty($filterInfo['value_function']) ? $filterInfo['value_function'] : null;
 
         $property = $filter[0];
 
@@ -134,49 +138,49 @@ class HereTrigger
         
         switch ($operator) {
             case Operators::LESS_THAN:
-                return $this->$property < $comparisonValue;
+                return $this->$uniquePropertyName < $comparisonValue;
                 break;
             case Operators::LESS_THAN_EQUAL_TO:
-                return$this->$property <= $comparisonValue;
+                return$this->$uniquePropertyName <= $comparisonValue;
                 break;
             case Operators::GREATER_THAN:
-                return $this->$property > $comparisonValue;
+                return $this->$uniquePropertyName > $comparisonValue;
                 break;
             case Operators::GREATER_THAN_EQUAL_TO:
-                return $this->$property >= $comparisonValue;
+                return $this->$uniquePropertyName >= $comparisonValue;
                 break;
             case Operators::NUMBER_EQUAL_TO:
-                return $this->$property == $comparisonValue;
+                return $this->$uniquePropertyName == $comparisonValue;
                 break;
             case Operators::NUMBER_NOT_EQUAL_TO:
-                return $this->$property != $comparisonValue;
+                return $this->$uniquePropertyName != $comparisonValue;
                 break;
             case Operators::RANGE_INCLUSIVE:
-                return $this->$property >= $comparisonValue[0] && $this->$property <= $comparisonValue[1];
+                return $this->$uniquePropertyName >= $comparisonValue[0] && $this->$uniquePropertyName <= $comparisonValue[1];
                 break;
             case Operators::RANGE_EXCLUSIVE:
-                return $this->$property > $comparisonValue[0] && $this->$property < $comparisonValue[1];
+                return $this->$uniquePropertyName > $comparisonValue[0] && $this->$uniquePropertyName < $comparisonValue[1];
                 break;
             case Operators::TEXT_CONTAINS:
-                return strpos($this->$property, $comparisonValue) !== false;
+                return strpos($this->$uniquePropertyName, $comparisonValue) !== false;
                 break;
             case Operators::DATE_GREATER_THAN_OR_EQUAL_TO:
-                return Carbon::parse($this->$property)->greaterThanOrEqualTo($comparisonValue);
+                return Carbon::parse($this->$uniquePropertyName)->greaterThanOrEqualTo($comparisonValue);
                 break;
             case Operators::DATE_LESS_THAN_OR_EQUAL_TO:
-                return Carbon::parse($this->$property)->lessThanOrEqualTo($comparisonValue);
+                return Carbon::parse($this->$uniquePropertyName)->lessThanOrEqualTo($comparisonValue);
                 break;
             case Operators::DATE_EQUAL_TO:
-                return Carbon::parse($this->$property)->equalTo($comparisonValue);
+                return Carbon::parse($this->$uniquePropertyName)->equalTo($comparisonValue);
                 break;
             case Operators::DATE_NOT_EQUAL_TO:
-                return Carbon::parse($this->$property)->notEqualTo($comparisonValue);
+                return Carbon::parse($this->$uniquePropertyName)->notEqualTo($comparisonValue);
                 break;
             case Operators::DATE_BETWEEN_INCLUSIVE:
-                return Carbon::parse($this->$property)->betweenIncluded($comparisonValue[0], $comparisonValue[1]);
+                return Carbon::parse($this->$uniquePropertyName)->betweenIncluded($comparisonValue[0], $comparisonValue[1]);
                 break;
             case Operators::DATE_BETWEEN_EXCLUSIVE:
-                return Carbon::parse($this->$property)->betweenExcluded($comparisonValue[0], $comparisonValue[1]);
+                return Carbon::parse($this->$uniquePropertyName)->betweenExcluded($comparisonValue[0], $comparisonValue[1]);
                 break;
             
             default:
@@ -186,8 +190,7 @@ class HereTrigger
     }
 
     public function getValue($function, $data){
-        $helperClass = $this->config['helper_class'];
-        return $helperClass::$function($data);
+        return $this->helper::$function($data);
     }
 
     public function isLogicalOperator($match)

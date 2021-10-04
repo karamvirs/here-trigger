@@ -5,8 +5,8 @@ use Illuminate\Support\Carbon;
 
 
 return [
+    'helper_class' => 'App\Helpers\HereTriggerHelper',
     'filters' => [
-        'helper_class' => 'App\Helpers\HereTriggerHelper',
         'user' => [
             'age_bet_30_and_40' => ['filter' => ['age', Operators::RANGE_INCLUSIVE, [30, 40]], 'value_function' => 'userAge'],
             'next_birthday_in_2_months' => ['filter' => ['next_birthday', Operators::LESS_THAN_EQUAL_TO, Carbon::now()->addMonths(2)], 'value_function' => 'userNextBirthday'],
