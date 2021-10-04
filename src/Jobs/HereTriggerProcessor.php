@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Support\Facades\Log;
 
 class HereTriggerProcessor implements ShouldQueue
 {
@@ -37,6 +38,11 @@ class HereTriggerProcessor implements ShouldQueue
      */
     public function handle(HereTrigger $service)
     {
-        $service->process($this->trigger, $this->payload);
+        try {
+            $service->process($this->trigger, $this->payload);
+        } catch (\Throwable $th) {
+            Log::error('HereTrigger: Job Exception' . $th->getMessage(), ['trace' => $th->getTraceAsString()]);
+        }
+        
     }
 }
