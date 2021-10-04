@@ -113,15 +113,20 @@ class HereTrigger
         // $itemType = explode('.',$term)[0];
         $splits = explode('.',$term);
 
+        $itemType = $splits[0];
+
         $filterInfo = $this->config['filters'][$splits[0]][$splits[1]];
 
         $filter = $filterInfo['filter'];
-        $valueFunction = $filterInfo['value_function'];
+        $valueFunction = $filterInfo['value_function'] ?? null;
 
         $property = $filter[0];
 
-        if(!isset($this->$property)){
-            $this->$property = $this->getValue($valueFunction, $data);
+        // If this property is already set, dont re-evaluate
+        $uniquePropertyName = 'prop_' . $itemType[0] . '_' . $property;
+
+        if(!isset($this->$uniquePropertyName)){
+            $this->$uniquePropertyName = $valueFunction ? $this->getValue($valueFunction, $data) : $data[$itemType]->$property;
         }
 
         $operator = $filter[1];

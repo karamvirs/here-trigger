@@ -34,7 +34,7 @@ HereTriggerProcessor::disptach('new_order', ['user' => <User Object>, 'order' =>
 ...
 ...
 ```
-NOTE: data array must contain all data objects that will be used in the filters defined in the config.
+NOTE: data array must contain all data objects that will be used in the filters defined in the config. The key names must match the key names defined under the filters section in the here-trigger config 
 
 When the job is processed, the code looks at the config file (here-trigger.php) and retrieves the actions for this trigger. In our example config they are:
     ['high_value_customer', 'young_international_customer']
@@ -42,7 +42,8 @@ When the job is processed, the code looks at the config file (here-trigger.php) 
 The rule expression for each action (under the 'actions' key in the config) is evaluated, and if true, jobs specified under processors are dispatched.
 
 ## How it works
-By default the package publishes following 3 files:
+When you run the vendor:publish command, following 3 files are published:
+
 * config/here-trigger.php
 * app/Helpers/HereTriggerHelper.php
 * app/Jobs/HereTriggerProcessor.php
@@ -58,7 +59,7 @@ sets the path to the helper class that defines all filter value functions. Feel 
 _**filters**_
 
 contain the entities or data objects whose properties will be evaluated for conditions defined under the action rules.
-In the default Example, you will see there are 2 entries under filters: report and user
+In the default Example, you will see there are 3 entries under filters: user, order, wishlist
 
 Each entity in under the filters has a filtername, the actual filter and the function name that evaluates the value for that filter.
 
@@ -66,11 +67,11 @@ Ex:
 ```
 'total_spent_till_date_more_than_1500' => ['filter' => ['total_spent_till_date', operators::GREATER_THAN, 1500], 'value_function' => 'userTotalSpendTillDate'],
 ```
-*total_spent_till_date_more_than_1500* - is the filter name.
+*total_spent_till_date_more_than_1500* - is the filter name which is referred to in the rule expression under the actions.
 
-*'filter' => ['total_spent_till_date', operators::GREATER_THAN, 1500]* - defines the actual filter. Here it says, the totla amount spent by the user should be greater than 1500.
+*'filter' => ['total_spent_till_date', operators::GREATER_THAN, 1500]* - defines the actual filter. Here it says, the total amount spent by the user should be greater than 1500.
 
-*'value_function' => 'userTotalSpendTillDate'* - tells the function name which you will define in the helper file (HereTriggerHelper.php) and will be used to calculate the value of this property (total_spent_till_date, in this case.)
+*'value_function' => 'userTotalSpendTillDate'* - tells the function name which you will define in the helper file (HereTriggerHelper.php) and will be used to calculate the value of this property (total_spent_till_date, in this case.) If a value function is not specified, then it is assumed that the property is directly accessible on the passed object.
 
 _**actions**_
 
@@ -81,12 +82,12 @@ rule is an expression that must evaluate to true for the processors to run. Expr
 but you cannot use:
     {xyz {abc }} 
 
-The terms is the expression are actual filter names defined in the filters section.
+The terms in the expression are actual filter names defined in the filters section.
 
-processors is an array of Jobs you will define, which will contain the code to be executed when the rule evaluates to true.
+'processors' is an array of Jobs you will define, which will contain the code to be executed when the rule evaluates to true.
 
 Example config mentions 2 such jobs, but doesnt impplement them:
-App\Jobs\ProcessUserGroupChange
+App\Jobs\Send15PercentDiscount
 App\Jobs\HighValueNotification
 
 ## Change log
