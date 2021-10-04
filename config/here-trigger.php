@@ -5,35 +5,39 @@ use Illuminate\Support\Carbon;
 
 
 return [
-    'helper_class' => 'App\Helpers\HereTriggerHelper',
     'filters' => [
-        'report' => [
-            'score_less_than_800' => ['filter' => ['score', Operators::LESS_THAN, 800], 'value_function' => 'reportScore'],
-            'total_balances_greater_than_1000' => ['filter' => ['total_balances', Operators::GREATER_THAN, 1000], 'value_function' => 'reportTotalBalances'],
-            'total_balances_less_than_9000' => ['filter' => ['total_balances', Operators::LESS_THAN, 9000], 'value_function' => 'reportTotalBalances'],
-            'no_negative_items' => ['filter' => ['new_negative_items', Operators::EQUAL_TO, 0], 'value_function' => 'reportNewNegativeItems'],
-            'average_score_less_than_560' => ['filter' => ['average_score', Operators::LESS_THAN, 560], 'value_function' => 'reportAverageScore'],
-            '5_or_more_new_negative_items' => ['filter' => ['new_negative_items', Operators::GREATER_THAN, 5], 'value_function' => 'reportNewNegativeItems'],
-        ],
+        'helper_class' => 'App\Helpers\HereTriggerHelper',
         'user' => [
-            'signup_in_last_30_days' => ['filter' => ['created_at', Operators::DATE_GREATER_THAN_OR_EQUAL_TO, Carbon::now()->subDays(30)], 'value_function' => 'userCreatedAt'],
-            'signup_in_last_60_days' => ['filter' => ['created_at', Operators::DATE_GREATER_THAN_OR_EQUAL_TO, Carbon::now()->subDays(60)], 'value_function' => 'userCreatedAt'],
-            'signup_in_last_90_days' => ['filter' => ['created_at', Operators::DATE_GREATER_THAN_OR_EQUAL_TO, Carbon::now()->subDays(90)], 'value_function' => 'userCreatedAt'],
-            'has_paid' => ['filter' => ['overridden_decline', Operators::EQUAL_TO, 0], 'value_function' => 'userOverriddenDecline'],
+            'age_bet_30_and_40' => ['filter' => ['age', Operators::RANGE_INCLUSIVE, [30, 40]], 'value_function' => 'userAge'],
+            'next_birthday_in_2_months' => ['filter' => ['next_birthday', Operators::LESS_THAN_EQUAL_TO, Carbon::now()->addMonths(2)], 'value_function' => 'userNextBirthday'],
+            'prev_order_within_a_month' => ['filter' => ['prev_order_date', operators::DATE_GREATER_THAN_OR_EQUAL_TO, Carbon::now()->subMonth()], 'value_function' => 'userPrevOrderDate'],
+            'prev_order_within_10_days' => ['filter' => ['prev_order_date', operators::DATE_GREATER_THAN_OR_EQUAL_TO, Carbon::now()->subDays(10)], 'value_function' => 'userPrevOrderDate'],
+            'total_spent_till_date_more_than_1500' => ['filter' => ['total_spent_till_date', operators::GREATER_THAN, 1500], 'value_function' => 'userTotalSpendTillDate'],
+            'more_than_5_orders' => ['filter' => ['total_orders', operators::GREATER_THAN, 5], 'value_function' => 'userTotalOrderCount'],
+            'at_least_2_orders' => ['filter' => ['total_orders', operators::GREATER_THAN_EQUAL_TO, 2], 'value_function' => 'userTotalOrderCount'],
+        ],
+        'order' => [
+            'order_total_creater_than_200' => ['filter' => ['order_total', operators::GREATER_THAN_EQUAL_TO, 200], 'value_function' => 'orderTotal'],
+            'order_total_bet_80_and_100' => ['filter' => ['order_total', operators::RANGE_INCLUSIVE, [80, 100]], 'value_function' => 'orderTotal'],
+        ],
+        'wishlist' => [
+            'items_total_greater_than_3' => ['filter' => ['created_at', operators::GREATER_THAN, 3], 'value_function' => 'wishlistItemsCount'],
+            'items_total_1' => ['filter' => ['created_at', operators::NUMBER_EQUAL_TO, 1], 'value_function' => 'wishlistItemsCount'],
             
         ]
     ],
     'actions' => [
-        'group_change' => [
-            'rule'=> '{ report.score_less_than_800 && (report.total_balances_greater_than_1000 OR report.no_negative_items) } OR user.signup_in_last_30_days', 
-            'processors' =>['App\Jobs\ProcessUserGroupChange'] 
+        'high_value_customer' => [
+            'rule' => '[ user.age_bet_30_and_40 && { user.total_spent_till_date_more_than_1500 OR (user.prev_order_within_10_days && user.at_least_2_orders) } ] OR user.more_than_5_orders',
+            'processors' => ['App\Jobs\HighValueNotification',  'App\Jobs\Send15PercentDiscount']
         ],
-        'high_value' => [
-            'rule' => 'report.5_or_more_new_negative_items',
-            'processors' => ['App\Jobs\HighValueNotification']
-        ]
+        'young_international_customer' => [
+            'rule' => '[ user.age_bet_30_and_40 && { user.total_spent_till_date_more_than_1500 OR (user.prev_order_within_10_days && user.at_least_2_orders) } ] OR user.more_than_5_orders',
+            'processors' => ['App\Jobs\5PCDiscountToInternational']
+        ],
+
     ],
     'triggers' => [
-        'new_report_pull' =>['group_change', 'high_value'],
+        'new_order' =>['high_value_customer', 'young_international_customer'],
     ]
 ];

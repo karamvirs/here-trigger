@@ -140,8 +140,11 @@ class HereTrigger
             case Operators::GREATER_THAN_EQUAL_TO:
                 return $this->$property >= $comparisonValue;
                 break;
-            case Operators::EQUAL_TO:
+            case Operators::NUMBER_EQUAL_TO:
                 return $this->$property == $comparisonValue;
+                break;
+            case Operators::NUMBER_NOT_EQUAL_TO:
+                return $this->$property != $comparisonValue;
                 break;
             case Operators::RANGE_INCLUSIVE:
                 return $this->$property >= $comparisonValue[0] && $this->$property <= $comparisonValue[1];
@@ -155,6 +158,21 @@ class HereTrigger
             case Operators::DATE_GREATER_THAN_OR_EQUAL_TO:
                 return Carbon::parse($this->$property)->greaterThanOrEqualTo($comparisonValue);
                 break;
+            case Operators::DATE_LESS_THAN_OR_EQUAL_TO:
+                return Carbon::parse($this->$property)->lessThanOrEqualTo($comparisonValue);
+                break;
+            case Operators::DATE_EQUAL_TO:
+                return Carbon::parse($this->$property)->equalTo($comparisonValue);
+                break;
+            case Operators::DATE_NOT_EQUAL_TO:
+                return Carbon::parse($this->$property)->notEqualTo($comparisonValue);
+                break;
+            case Operators::DATE_BETWEEN_INCLUSIVE:
+                return Carbon::parse($this->$property)->betweenIncluded($comparisonValue[0], $comparisonValue[1]);
+                break;
+            case Operators::DATE_BETWEEN_EXCLUSIVE:
+                return Carbon::parse($this->$property)->betweenExcluded($comparisonValue[0], $comparisonValue[1]);
+                break;
             
             default:
                 return null;
@@ -165,41 +183,6 @@ class HereTrigger
     public function getValue($function, $data){
         $helperClass = $this->config['helper_class'];
         return $helperClass::$function($data);
-    }
-
-    public function evaluateExpression1($expression, $data)
-    {
-        // matches everything except space
-        preg_match_all('/\S*/', $expression, $matches);
-
-        $operator = null;
-        $result = null;
-        foreach ($matches as $match) {
-            if($this->isArithmeticOperator($match)){
-                $operator = $match;
-            }else{
-                switch ($operator) {
-                    case '+':
-                        $result = $result ? $result + $data->$match : $data->$match;
-                        break;
-                    case '-':
-                        $result = $result ? $result - $data->$match : $data->$match;
-                        break;
-                    case '*':
-                        $result = $result ? $result * $data->$match : $data->$match;
-                        break;
-                    case '/':
-                        $result = $result ? $result / $data->$match : $data->$match;
-                        break;
-                    
-                    default:
-                        
-                        break;
-                }
-            }
-        }
-
-        return $result;
     }
 
     public function isLogicalOperator($match)

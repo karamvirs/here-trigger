@@ -7,32 +7,37 @@ use Illuminate\Support\Facades\Log;
 
 class HereTriggerHelper {
     
-    public static function reportScore($data)
+    public static function userAge($data)
     {
         Log::info(__FUNCTION__);
-        return 750;
+        return 35;
     }
-    public static function reportTotalBalances($data)
+    public static function userNextBirthday($data)
     {
         Log::info(__FUNCTION__);
-        return 500;
+        return Carbon::now()->addMonth();
     }
-    public static function reportNewNegativeItems($data)
+    public static function userPrevOrderDate($data)
+    {
+        Log::info(__FUNCTION__);
+        return Carbon::now()->subDays(8);
+    }
+    public static function userTotalSpendTillDate($data)
+    {
+        Log::info(__FUNCTION__);
+        return 1400;
+    }
+    public static function userTotalOrderCount($data)
     {
         Log::info(__FUNCTION__);
         return 5;
     }
-    public static function reportAverageScore($data)
+    public static function orderTotal($data)
     {
         Log::info(__FUNCTION__);
         return false;
     }
-    public static function userCreatedAt($data)
-    {
-        Log::info(__FUNCTION__);
-        return Carbon::now()->subMonths(3);
-    }
-    public static function userOverriddenDecline($data)
+    public static function wishlistItemsCount($data)
     {
         Log::info(__FUNCTION__);
         return false;

@@ -17,7 +17,10 @@ Via Composer
 
 ``` bash
 $ composer require karamvirs/here-trigger
+
+$ php artisan vendor:publish --provider="Karamvirs\HereTrigger\HereTriggerServiceProvider"
 ```
+
 
 ## Overview
 Anywhere in your application, you disptach the HereTriggerProcessor job with a trigger name and a data array.
@@ -27,14 +30,14 @@ Anywhere in your application, you disptach the HereTriggerProcessor job with a t
 use App\Jobs\HereTriggerProcessor;
 ...
 ...
-HereTriggerProcessor::disptach('new_report_pull', ['user' => <My User Object>, 'report' => <My Report Object>])
+HereTriggerProcessor::disptach('new_order', ['user' => <User Object>, 'order' => <Order Object>])
 ...
 ...
 ```
 NOTE: data array must contain all data objects that will be used in the filters defined in the config.
 
 When the job is processed, the code looks at the config file (here-trigger.php) and retrieves the actions for this trigger. In our example config they are:
-    ['group_change', 'high_value']
+    ['high_value_customer', 'young_international_customer']
 
 The rule expression for each action (under the 'actions' key in the config) is evaluated, and if true, jobs specified under processors are dispatched.
 
@@ -61,13 +64,13 @@ Each entity in under the filters has a filtername, the actual filter and the fun
 
 Ex: 
 ```
-'score_less_than_800' => ['filter' => ['score', Operators::LESS_THAN, 800], 'value_function' => 'reportScore'],
+'total_spent_till_date_more_than_1500' => ['filter' => ['total_spent_till_date', operators::GREATER_THAN, 1500], 'value_function' => 'userTotalSpendTillDate'],
 ```
-*score_less_than_800* is the filter name.
+*total_spent_till_date_more_than_1500* - is the filter name.
 
-*'filter' => ['score', Operators::LESS_THAN, 800]* defines the actual filter. Here it says, the score should be less than 800.
+*'filter' => ['total_spent_till_date', operators::GREATER_THAN, 1500]* - defines the actual filter. Here it says, the totla amount spent by the user should be greater than 1500.
 
-*'value_function' => 'reportScore'* tells the function name which you will define in the helper file (HereTriggerHelper.php) and will be used to calculate the value of this property (score, in this case.)
+*'value_function' => 'userTotalSpendTillDate'* - tells the function name which you will define in the helper file (HereTriggerHelper.php) and will be used to calculate the value of this property (total_spent_till_date, in this case.)
 
 _**actions**_
 
